@@ -1,4 +1,6 @@
-import os
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
 import math
 import argparse
