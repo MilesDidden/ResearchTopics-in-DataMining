@@ -8,6 +8,7 @@ import time
 
 import numpy as np
 import gymnasium as gym
+import gymnasium_robotics
 import matplotlib.pyplot as plt
 
 import torch
@@ -126,11 +127,11 @@ def build_env(task):
         'Reacher': 'Reacher-v2',
         'SawyerReach': 'SawyerReachXYZEnv-v1',
         'SawyerDoor': 'SawyerDoor-v0',
-        'FetchReach': 'FetchReach-v2',
-        'FetchPush': 'FetchPush-v2',
-        'FetchPick': 'FetchPickAndPlace-v2',
-        'FetchSlide': 'FetchSlide-v2',
-        'HandReach': 'HandReach-v1',
+        'FetchReach': 'FetchReach-v4',           # Changed v2 to v4
+        'FetchPush': 'FetchPush-v3',             # Changed v2 to v3
+        'FetchPick': 'FetchPickAndPlace-v3',     # Changed v2 to v3
+        'FetchSlide': 'FetchSlide-v3',           # Changed v2 to v3
+        'HandReach': 'HandReach-v3',             # Changed v1 to v3
     }
     env_id = env_dict[task]
     env = gym.make(env_id)
@@ -266,8 +267,11 @@ class OfflineMerlin:
         self.state_shape = states.shape
         self.state_dtype = states.dtype
 
-        variant = dataset_path.split('/')[-3]
-        env_name = dataset_path.split('/')[-2]
+        path_parts = os.path.normpath(dataset_path).split(os.sep)
+        variant = path_parts[-3]
+        env_name = path_parts[-2]
+
+
         if self.image_obs:
             self.log_dir, self.checkpoint_dir, self.buffer_dir = setup_logging('./logging/img_obs', \
                                                                                 env_name, variant, seed,

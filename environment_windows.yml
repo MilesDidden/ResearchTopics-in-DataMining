@@ -14,6 +14,7 @@ dependencies:
   - ca-certificates
   - glew=2.1.0
   - glfw3=3.2.1
+  - ipykernel=7.3.0
   - pip
   - setuptools
   - wheel
@@ -30,6 +31,7 @@ dependencies:
     - fsspec==2024.6.1
     - glfw==2.7.0
     - gymnasium==0.29.1
+    - gymnasium-robotics==1.4.2
     - imageio==2.34.2
     - jinja2==3.1.4
     - joblib==1.4.2
