@@ -129,7 +129,7 @@ def build_env(task):
         'SawyerDoor': 'SawyerDoor-v0',
         'FetchReach': 'FetchReach-v4',           # Changed v2 to v4
         'FetchPush': 'FetchPush-v3',             # Changed v2 to v3
-        'FetchPick': 'FetchPickAndPlace-v3',     # Changed v2 to v3
+        'FetchPick': 'FetchPickAndPlace-v4',     # Changed v2 to v4
         'FetchSlide': 'FetchSlide-v3',           # Changed v2 to v3
         'HandReach': 'HandReach-v3',             # Changed v1 to v3
     }

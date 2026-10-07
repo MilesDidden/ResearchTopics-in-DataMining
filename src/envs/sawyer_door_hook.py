@@ -127,7 +127,10 @@ class SawyerDoorHookEnv(
         return info
 
     def get_door_angle(self):
-        return np.array([self.data.get_joint_qpos('doorjoint')])
+        # Bypass the buggy cython wrapper by fetching the index directly
+        joint_id = self.model.joint_name2id('doorjoint')
+        qpos_addr = self.model.jnt_qposadr[joint_id]
+        return np.array([self.data.qpos[qpos_addr]])
 
     @property
     def endeff_id(self):

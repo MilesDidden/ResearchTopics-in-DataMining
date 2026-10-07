@@ -48,6 +48,23 @@ class SawyerReachXYZEnv(SawyerXYZEnv, MultitaskEnv):
         ])
         self.reset()
 
+    def reset(self, seed=None, options=None, **kwargs):
+        # Handle the seed the old Gym way
+        if seed is not None and hasattr(self, 'seed'):
+            self.seed(seed)
+            
+        # Call the old MujocoEnv reset
+        result = super().reset()
+        
+        # Check if the result is ALREADY a tuple (obs, info) or just obs
+        if isinstance(result, tuple) and len(result) == 2:
+            obs, info = result
+        else:
+            obs = result
+            info = {}
+            
+        return obs, info
+
     def step(self, action):
         self.set_xyz_action(action)
         # keep gripper closed

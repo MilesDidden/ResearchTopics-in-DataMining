@@ -176,14 +176,15 @@ class SawyerGoalWrapper(Wrapper):
             self.reward_type = 'angle_success'
 
     
-    def reset(self):
-        obs_dict, info = self.env.reset()
+    def reset(self, seed=None, options=None, **kwargs):
+        # Accept the new gymnasium arguments and pass them down
+        obs_dict, info = self.env.reset(seed=seed, options=options, **kwargs)
         obs = {
-            'observation':obs_dict['observation'],
-            'desired_goal':obs_dict['desired_goal'],
-            'achieved_goal':obs_dict['achieved_goal']
+            'observation': obs_dict['observation'],
+            'desired_goal': obs_dict['desired_goal'],
+            'achieved_goal': obs_dict['achieved_goal']
         }
-        return obs, info 
+        return obs, info
     
     def step(self, action):
         obs_dict, reward, done, truncated, info = self.env.step(action)
