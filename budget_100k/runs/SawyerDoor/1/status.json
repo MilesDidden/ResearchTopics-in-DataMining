@@ -1,0 +1,28 @@
+{
+  "status": "complete",
+  "task": "SawyerDoor",
+  "variant": "expert",
+  "seed": 1,
+  "max_timesteps": 100000,
+  "started": "2026-10-14T09:43:15.438342+00:00",
+  "command": [
+    "/home/hidde/merlin/.venv/bin/python",
+    "-u",
+    "/home/hidde/merlin/src/train_offline.py",
+    "--task",
+    "SawyerDoor",
+    "--variant",
+    "expert",
+    "--seed",
+    "1",
+    "--max-timesteps",
+    "100000",
+    "--max-path-length",
+    "50"
+  ],
+  "best_training_steps": 30000,
+  "best_policy_sha256": "d0ce26f5bbd37b902a2cae2954830f1c8d9e0712fb9b6925656f45b47931a0bc",
+  "complete_policy_sha256": "ef12951d85d368ff9319bb650534c24ec2ec8b38c5c867c2b057247e46dfbf59",
+  "finished": "2026-10-14T10:25:20.846840+00:00",
+  "elapsed_seconds": 2524.9820505919997
+}

@@ -1,0 +1,28 @@
+{
+  "status": "complete",
+  "task": "FetchReach",
+  "variant": "expert",
+  "seed": 2,
+  "max_timesteps": 100000,
+  "started": "2026-10-14T08:22:16.175544+00:00",
+  "command": [
+    "/home/hidde/merlin/.venv/bin/python",
+    "-u",
+    "/home/hidde/merlin/src/train_offline.py",
+    "--task",
+    "FetchReach",
+    "--variant",
+    "expert",
+    "--seed",
+    "2",
+    "--max-timesteps",
+    "100000",
+    "--max-path-length",
+    "50"
+  ],
+  "best_training_steps": 100000,
+  "best_policy_sha256": "b3e84bac1f9ca15a023125921ccbffb5d071f6d27a744eb2f63c1ef7899f4ff5",
+  "complete_policy_sha256": "d0f0268687b7eb97a3bf47d59bb1caa01c346fb53af8373ad9f1f8ca22663ab4",
+  "finished": "2026-10-14T09:02:18.921570+00:00",
+  "elapsed_seconds": 2402.7395079100024
+}
