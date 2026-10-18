@@ -133,6 +133,59 @@ class ReplayBuffer:
         traj_idxs, time_state_idxs, time_goal_idxs = self._sample_indices(batch_size)
         return self._get_batch(traj_idxs, time_state_idxs, time_goal_idxs)
 
+    def _horizon_trajectory_indices(self, trajectory_indices):
+        if trajectory_indices is None:
+            trajectory_indices = np.arange(self.current_buffer_size)
+        else:
+            trajectory_indices = np.asarray(trajectory_indices)
+            if trajectory_indices.ndim != 1 or trajectory_indices.size == 0:
+                raise ValueError('trajectory_indices must be a nonempty 1D sequence')
+            if not np.issubdtype(trajectory_indices.dtype, np.integer):
+                raise ValueError('trajectory_indices must contain integers')
+            if np.any(trajectory_indices < 0) or np.any(trajectory_indices >= self.current_buffer_size):
+                raise ValueError('trajectory_indices must refer to loaded trajectories')
+
+        lengths = self._length_of_traj[trajectory_indices]
+        if np.any(lengths < 0) or np.any(lengths > self.max_trajectory_length):
+            raise ValueError('trajectory lengths must fit within the buffer storage')
+        trajectory_indices = trajectory_indices[lengths >= 2]
+        if trajectory_indices.size == 0:
+            raise ValueError('horizon sampling requires a trajectory with at least two states')
+        return trajectory_indices
+
+    def split_horizon_trajectories(self, validation_fraction=0.2, seed=0):
+        """Split whole trajectories to prevent train/validation overlap."""
+        if not 0 < validation_fraction < 1:
+            raise ValueError('validation_fraction must be between zero and one')
+        trajectory_indices = self._horizon_trajectory_indices(None)
+        if trajectory_indices.size < 2:
+            raise ValueError('splitting requires at least two eligible trajectories')
+
+        rng = np.random.default_rng(seed)
+        trajectory_indices = rng.permutation(trajectory_indices)
+        validation_size = min(
+            trajectory_indices.size - 1,
+            max(1, int(np.ceil(trajectory_indices.size * validation_fraction))),
+        )
+        return trajectory_indices[validation_size:], trajectory_indices[:validation_size]
+
+    def sample_horizon_batch(self, batch_size, trajectory_indices=None):
+        """Sample (state, future goal, step gap) within the supplied split."""
+        if not isinstance(batch_size, (int, np.integer)) or batch_size <= 0:
+            raise ValueError('batch_size must be a positive integer')
+        trajectory_indices = self._horizon_trajectory_indices(trajectory_indices)
+        traj_idxs = np.random.choice(trajectory_indices, batch_size)
+        lengths = self._length_of_traj[traj_idxs]
+        # Sample the gap first, then a valid start.
+        horizons = np.random.randint(1, lengths)
+        time_state_idxs = np.random.randint(0, lengths - horizons)
+        time_goal_idxs = time_state_idxs + horizons
+
+        observations = self._states[traj_idxs, time_state_idxs]
+        goals = self._achieved_states[traj_idxs, time_goal_idxs]
+        targets = horizons.astype(np.float32)[:, None]
+        return observations, goals, targets
+
     def get_transition(self, traj_idx, time_idx):
         assert time_idx.all() > 0
         next_state = self._states[traj_idx, time_idx]
