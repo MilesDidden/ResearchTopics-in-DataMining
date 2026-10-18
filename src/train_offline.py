@@ -1,6 +1,4 @@
-import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+import os
 import pickle
 import math
 import argparse
@@ -8,7 +6,6 @@ import time
 
 import numpy as np
 import gymnasium as gym
-import gymnasium_robotics
 import matplotlib.pyplot as plt
 
 import torch
@@ -22,6 +19,7 @@ from src.components.dynamics_model import train_dynamics, train_reverse_bc
 from src.components.representations import train_contrastive_encoder
 from src.components.normalizer import normalizer
 from src.components.trajectory_stitching import StateTree
+from src.components.policy_checkpoint import save_training_sidecar
 
 
 HER_RATIO_TUNED = {
@@ -30,7 +28,7 @@ HER_RATIO_TUNED = {
     'Reacher': {'expert': 0.2, 'random': 1.0},
     'SawyerReach': {'expert': 1.0, 'random': 1.0},
     'SawyerDoor': {'expert': 0.2, 'random': 1.0},
-    'FetchReach': {'expert': 1.0, 'random': 1.0},
+    'FetchReach': {'expert': 0.2, 'random': 1.0},
     'FetchPush': {'expert': 0.0, 'random': 0.2},
     'FetchPick': {'expert': 0.0, 'random': 0.5},
     'FetchSlide': {'expert': 0.2, 'random': 0.8},
@@ -127,11 +125,11 @@ def build_env(task):
         'Reacher': 'Reacher-v2',
         'SawyerReach': 'SawyerReachXYZEnv-v1',
         'SawyerDoor': 'SawyerDoor-v0',
-        'FetchReach': 'FetchReach-v4',           # Changed v2 to v4
-        'FetchPush': 'FetchPush-v3',             # Changed v2 to v3
-        'FetchPick': 'FetchPickAndPlace-v4',     # Changed v2 to v4
-        'FetchSlide': 'FetchSlide-v3',           # Changed v2 to v3
-        'HandReach': 'HandReach-v3',             # Changed v1 to v3
+        'FetchReach': 'FetchReach-v2',
+        'FetchPush': 'FetchPush-v2',
+        'FetchPick': 'FetchPickAndPlace-v2',
+        'FetchSlide': 'FetchSlide-v2',
+        'HandReach': 'HandReach-v1',
     }
     env_id = env_dict[task]
     env = gym.make(env_id)
@@ -267,11 +265,8 @@ class OfflineMerlin:
         self.state_shape = states.shape
         self.state_dtype = states.dtype
 
-        path_parts = os.path.normpath(dataset_path).split(os.sep)
-        variant = path_parts[-3]
-        env_name = path_parts[-2]
-
-
+        variant = dataset_path.split('/')[-3]
+        env_name = dataset_path.split('/')[-2]
         if self.image_obs:
             self.log_dir, self.checkpoint_dir, self.buffer_dir = setup_logging('./logging/img_obs', \
                                                                                 env_name, variant, seed,
@@ -577,6 +572,7 @@ class OfflineMerlin:
 
                     if dis > best_score:
                         torch.save(self.policy.state_dict(), os.path.join(self.checkpoint_dir, 'best_policy.pt'))
+                        save_training_sidecar(self, training_steps)
                         best_score = dis
             
         dis, undis, succ = self.eval_policy(100, training_steps)
